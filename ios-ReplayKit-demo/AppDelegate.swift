@@ -11,27 +11,54 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        if #available(iOS 13.0, *) {
+            // do nothing
+        } else {
+            window = UIWindow()
+            AppDelegate.setupWindow(window!)
+        }
         return true
     }
+    
+    class func setupWindow(_ window: UIWindow) {
+        
+        // position and size
+        window.frame = UIScreen.main.bounds
 
-    // MARK: UISceneSession Lifecycle
+        if #available(iOS 13.0, *) {
+            window.backgroundColor = .systemBackground
+        } else {
+            let viewController = ViewController.instance()
+            window.rootViewController = viewController
+            window.backgroundColor = .white
+        }
 
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        window.makeKeyAndVisible()
     }
-
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
-    }
-
-
 }
 
+//MARK : - instance Helper
+extension ViewController {
+    static func instance() -> ViewController {
+        
+        guard let viewController = UIStoryboard.viewController(
+            storyboardName: "Main",
+            identifier: "Main" ) as? ViewController else {
+                fatalError("ViewController not Found.")
+        }
+        return viewController
+    }
+}
+
+public extension UIStoryboard {
+    
+    class func viewController<T: UIViewController>(storyboardName: String,
+                                                   identifier: String) -> T? {
+        
+        return UIStoryboard(name: storyboardName, bundle: nil).instantiateViewController(
+            withIdentifier: identifier) as? T
+    }
+}
